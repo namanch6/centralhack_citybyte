@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R.A.T.H - Real-time Analytics and Trusted Health-monitoring</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e77 0%, #1a1d3d 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative geometric grid pattern - matching reference image */
+        .login-page-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(91, 108, 160, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(91, 108, 160, 0.15) 1px, transparent 1px);
+            background-size: 100px 100px;
+            transform: perspective(500px) rotateX(60deg);
+            transform-origin: center center;
+            pointer-events: none;
+        }
+
+        /* Hide decorative elements on dashboard */
+        .dashboard.active ~ .decorative-circle,
+        .dashboard.active ~ .login-page-bg {
+            display: none;
+        }
+
+        /* Decorative diamond shapes */
+        .decorative-circle {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border: 2px solid rgba(91, 108, 160, 0.2);
+            transform: rotate(45deg);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .circle-1 {
+            top: 10%;
+            right: 15%;
+            width: 200px;
+            height: 200px;
+            border-color: rgba(91, 108, 160, 0.25);
+        }
+
+        .circle-2 {
+            top: 12%;
+            right: 17%;
+            width: 180px;
+            height: 180px;
+            border-color: rgba(91, 108, 160, 0.2);
+        }
+
+        .circle-3 {
+            top: 14%;
+            right: 19%;
+            width: 160px;
+            height: 160px;
+            border-color: rgba(91, 108, 160, 0.15);
+        }
+
+        .circle-4 {
+            bottom: 15%;
+            right: 20%;
+            width: 180px;
+            height: 180px;
+            border-color: rgba(91, 108, 160, 0.2);
+        }
+
+        .circle-5 {
+            bottom: 17%;
+            right: 22%;
+            width: 160px;
+            height: 160px;
+            border-color: rgba(91, 108, 160, 0.15);
+        }
+
+        .circle-6 {
+            bottom: 25%;
+            left: 10%;
+            width: 140px;
+            height: 140px;
+            border-color: rgba(91, 108, 160, 0.18);
+        }
+
+        .circle-7 {
+            top: 30%;
+            left: 8%;
+            width: 120px;
+            height: 120px;
+            border-color: rgba(91, 108, 160, 0.15);
+        }
+
+        .circle-8 {
+            top: 50%;
+            right: 12%;
+            width: 130px;
+            height: 130px;
+            border-color: rgba(91, 108, 160, 0.2);
+        }
+
+        .circle-9 {
+            bottom: 40%;
+            left: 15%;
+            width: 110px;
+            height: 110px;
+            border-color: rgba(91, 108, 160, 0.12);
+        }
+
+        .circle-10 {
+            top: 20%;
+            left: 25%;
+            width: 90px;
+            height: 90px;
+            border-color: rgba(91, 108, 160, 0.1);
+        }
+
+        .circle-11 {
+            bottom: 10%;
+            left: 30%;
+            width: 100px;
+            height: 100px;
+            border-color: rgba(91, 108, 160, 0.12);
+        }
+
+        .circle-12 {
+            top: 35%;
+            right: 30%;
+            width: 85px;
+            height: 85px;
+            border-color: rgba(91, 108, 160, 0.1);
+        }
+
+        .circle-13 {
+            bottom: 30%;
+            right: 35%;
+            width: 95px;
+            height: 95px;
+            border-color: rgba(91, 108, 160, 0.11);
+        }
+
+        .circle-14 {
+            top: 60%;
+            left: 20%;
+            width: 105px;
+            height: 105px;
+            border-color: rgba(91, 108, 160, 0.13);
+        }
+
+        /* Login Page Styles */
+        .login-container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 50px 40px;
+            border-radius: 25px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 420px;
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-container h1 {
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .login-container p {
+            color: #b0b0b0;
+            margin-bottom: 35px;
+            font-size: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e0e0e0;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #8b7b9f;
+            box-shadow: 0 0 0 3px rgba(139, 123, 159, 0.2);
+            background: white;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: #b87878;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(184, 120, 120, 0.3);
+            background: #c58888;
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e77 0%, #1a1d3d 100%);
+            position: relative;
+            z-index: 100;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .dashboard-header {
+            background: rgba(30, 40, 80, 0.9);
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(91, 108, 160, 0.3);
+        }
+
+        .dashboard-header-left {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dashboard-header h1 {
+            color: #ffffff;
+            font-size: 28px;
+            margin: 0 0 5px 0;
+        }
+
+        .dashboard-header .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-details {
+            text-align: right;
+            margin-right: 15px;
+        }
+
+        .user-name {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .user-session {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+        }
+
+        .logout-btn {
+            padding: 10px 20px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #ff3838;
+            transform: translateY(-2px);
+        }
+
+        /* Dashboard Content Layout */
+        .dashboard-content {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 20px;
+            height: calc(100vh - 140px);
+        }
+
+        /* Left Panel - Metrics */
+        .metrics-panel {
+            background: rgba(20, 30, 60, 0.85);
+            border-radius: 15px;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(91, 108, 160, 0.4);
+        }
+
+        .metrics-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .metric-item {
+            background: rgba(40, 50, 90, 0.8);
+            padding: 15px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(91, 108, 160, 0.3);
+        }
+
+        .metric-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(91, 108, 160, 0.4);
+            background: rgba(50, 60, 100, 0.9);
+            border-color: rgba(91, 108, 160, 0.5);
+        }
+
+        .metric-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .metric-item-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-item-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .metric-item-unit {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-left: 5px;
+        }
+
+        /* Right Panel - Driving Analysis */
+        .analysis-panel {
+            background: rgba(20, 30, 60, 0.85);
+            border-radius: 15px;
+            padding: 30px;
+            overflow-y: auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(91, 108, 160, 0.4);
+        }
+
+        .analysis-panel h2 {
+            color: #ffffff;
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .driving-score {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .score-value {
+            font-size: 48px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .score-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .efficiency-rating {
+            font-size: 24px;
+            font-weight: 600;
+            color: #8bc34a;
+            margin-bottom: 10px;
+        }
+
+        .analysis-section {
+            margin-bottom: 25px;
+        }
+
+        .analysis-section h3 {
+            color: #ffffff;
+            font-size: 18px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .analysis-section h3::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: #4caf50;
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+
+        .analysis-item {
+            padding: 12px;
+            background: rgba(40, 50, 90, 0.6);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(91, 108, 160, 0.3);
+        }
+
+        .analysis-item-title {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .analysis-item-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(60, 70, 110, 0.8);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50 0%, #8bc34a 100%);
+            transition: width 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .dashboard-content {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .metrics-panel {
+                height: auto;
+                max-height: 400px;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #2c3e77;
+            font-size: 24px;
+        }
+
+        .close-btn {
+            background: #f0f0f0;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .close-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 40px 30px;
+            }
+
+            .login-container h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login page background wrapper -->
+    <div class="login-page-bg"></div>
+    
+    <!-- Decorative circles -->
+    <div class="decorative-circle circle-1"></div>
+    <div class="decorative-circle circle-2"></div>
+    <div class="decorative-circle circle-3"></div>
+    <div class="decorative-circle circle-4"></div>
+    <div class="decorative-circle circle-5"></div>
+    <div class="decorative-circle circle-6"></div>
+    <div class="decorative-circle circle-7"></div>
+    <div class="decorative-circle circle-8"></div>
+    <div class="decorative-circle circle-9"></div>
+    <div class="decorative-circle circle-10"></div>
+    <div class="decorative-circle circle-11"></div>
+    <div class="decorative-circle circle-12"></div>
+    <div class="decorative-circle circle-13"></div>
+    <div class="decorative-circle circle-14"></div>
+
+    <!-- Login Page -->
+    <div class="login-container" id="loginPage">
+        <h1>R.A.T.H</h1>
+        <p>Your Smart OBD Health & Efficiency System</p>
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Enter username" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter password" required>
+            </div>
+            <button type="submit" class="login-btn">Login</button>
+        </form>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+        <div class="dashboard-header">
+            <div class="dashboard-header-left">
+                <h1>R.A.T.H - Real-time Analytics and Trusted Health-monitoring</h1>
+                <span class="subtitle">Advanced EV Monitoring System</span>
+            </div>
+            <div class="user-info">
+                <div class="user-details">
+                    <div class="user-name" id="userName">User</div>
+                    <div class="user-session" id="sessionInfo">Session: Active</div>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            <!-- Left Panel - Metrics -->
+            <div class="metrics-panel">
+                <div class="metrics-list">
+                    <!-- Voltage -->
+                    <div class="metric-item" onclick="openModal('voltage')">
+                        <div class="metric-item-header">
+                            <span class="metric-item-label">Voltage</span>
+                        </div>
+                        <div>
+                            <span class="metric-item-value" id="voltageValue">--</span>
+                            <span class="metric-item-unit">V</span>
+                        </div>
+                    </div>
+
+                    <!-- Current -->
+                    <div class="metric-item" onclick="openModal('current')">
+                        <div class="metric-item-header">
+                            <span class="metric-item-label">Current</span>
+                        </div>
+                        <div>
+                            <span class="metric-item-value" id="currentValue">--</span>
+                            <span class="metric-item-unit">A</span>
+                        </div>
+                    </div>
+
+                    <!-- Battery Temperature -->
+                    <div class="metric-item" onclick="openModal('temperature')">
+                        <div class="metric-item-header">
+                            <span class="metric-item-label">Battery Temperature</span>
+                        </div>
+                        <div>
+                            <span class="metric-item-value" id="temperatureValue">--</span>
+                            <span class="metric-item-unit">°C</span>
+                        </div>
+                    </div>
+
+                    <!-- Speed -->
+                    <div class="metric-item" onclick="openModal('speed')">
+                        <div class="metric-item-header">
+                            <span class="metric-item-label">Speed</span>
+                        </div>
+                        <div>
+                            <span class="metric-item-value" id="speedValue">--</span>
+                            <span class="metric-item-unit">km/h</span>
+                        </div>
+                    </div>
+
+                    <!-- SOC -->
+                    <div class="metric-item" onclick="openModal('soc')">
+                        <div class="metric-item-header">
+                            <span class="metric-item-label">SOC</span>
+                        </div>
+                        <div>
+                            <span class="metric-item-value" id="socValue">--</span>
+                            <span class="metric-item-unit">%</span>
+                        </div>
+                    </div>
+
+                    <!-- SOH -->
+                    <div class="metric-item" onclick="openModal('soh')">
+                        <div class="metric-item-header">
+                            <span class="metric-item-label">SOH</span>
+                        </div>
+                        <div>
+                            <span class="metric-item-value" id="sohValue">--</span>
+                            <span class="metric-item-unit">%</span>
+                        </div>
+                    </div>
+
+                    <!-- Power -->
+                    <div class="metric-item" onclick="openModal('power')">
+                        <div class="metric-item-header">
+                            <span class="metric-item-label">Power (V×C/1000)</span>
+                        </div>
+                        <div>
+                            <span class="metric-item-value" id="powerValue">--</span>
+                            <span class="metric-item-unit">kW</span>
+                        </div>
+                    </div>
+
+                    <!-- Wh per km -->
+                    <div class="metric-item" onclick="openModal('whPerKm')">
+                        <div class="metric-item-header">
+                            <span class="metric-item-label">Wh per km</span>
+                        </div>
+                        <div>
+                            <span class="metric-item-value" id="whPerKmValue">--</span>
+                            <span class="metric-item-unit">Wh/km</span>
+                        </div>
+                    </div>
+
+                    <!-- Regen Percent -->
+                    <div class="metric-item" onclick="openModal('regenPercent')">
+                        <div class="metric-item-header">
+                            <span class="metric-item-label">Regen Percent</span>
+                        </div>
+                        <div>
+                            <span class="metric-item-value" id="regenPercentValue">--</span>
+                            <span class="metric-item-unit">%</span>
+                        </div>
+                    </div>
+
+                    <!-- Accel mps2 -->
+                    <div class="metric-item" onclick="openModal('accelMps2')">
+                        <div class="metric-item-header">
+                            <span class="metric-item-label">Accel (m/s²)</span>
+                        </div>
+                        <div>
+                            <span class="metric-item-value" id="accelMps2Value">--</span>
+                            <span class="metric-item-unit">m/s²</span>
+                        </div>
+                    </div>
+
+                    <!-- Power Spike -->
+                    <div class="metric-item" onclick="openModal('powerSpike')">
+                        <div class="metric-item-header">
+                            <span class="metric-item-label">Power Spike</span>
+                        </div>
+                        <div>
+                            <span class="metric-item-value" id="powerSpikeValue">--</span>
+                            <span class="metric-item-unit">kW</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Driving Analysis -->
+            <div class="analysis-panel">
+                <h2>Driving Analysis</h2>
+                
+                <div class="driving-score">
+                    <div class="score-circle">
+                        <div class="score-value" id="drivingScore">85</div>
+                        <div class="score-label">Score</div>
+                    </div>
+                    <div class="efficiency-rating" id="efficiencyRating">Excellent Driving</div>
+                </div>
+
+                <div class="analysis-section">
+                    <h3>Energy Efficiency</h3>
+                    <div class="analysis-item">
+                        <div class="analysis-item-title">Average Consumption</div>
+                        <div class="analysis-item-text" id="avgConsumption">Your average energy consumption is 145 Wh/km, which is 12% better than typical driving.</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="consumptionProgress" style="width: 88%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analysis-section">
+                    <h3>Regenerative Braking</h3>
+                    <div class="analysis-item">
+                        <div class="analysis-item-title">Regen Efficiency</div>
+                        <div class="analysis-item-text" id="regenEfficiency">You're recovering 18% of energy through regenerative braking. Great job using smooth deceleration!</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="regenProgress" style="width: 72%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analysis-section">
+                    <h3>Driving Behavior</h3>
+                    <div class="analysis-item">
+                        <div class="analysis-item-title">Acceleration Smoothness</div>
+                        <div class="analysis-item-text" id="accelSmoothness">Your acceleration is smooth and steady. Minimal power spikes detected, which helps extend battery life.</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="accelProgress" style="width: 90%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analysis-section">
+                    <h3>Battery Health Impact</h3>
+                    <div class="analysis-item">
+                        <div class="analysis-item-title">Temperature Management</div>
+                        <div class="analysis-item-text" id="tempManagement">Battery temperature has been maintained within optimal range. Your driving style supports long-term battery health.</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="tempProgress" style="width: 85%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Graphs -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Metric History</h2>
+                <button class="close-btn" onclick="closeModal()">✕</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Historical data storage
+        const historicalData = {
+            voltage: [],
+            current: [],
+            temperature: [],
+            speed: [],
+            soc: [],
+            soh: [],
+            power: [],
+            whPerKm: [],
+            regenPercent: [],
+            accelMps2: [],
+            powerSpike: [],
+            timestamps: []
+        };
+
+        let currentChart = null;
+        let updateInterval = null;
+
+        // Login handling
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Simple authentication (for demo purposes)
+            if (username && password) {
+                // Store username for display
+                document.getElementById('userName').textContent = username;
+                
+                // Update session info with current time
+                const now = new Date();
+                const timeStr = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+                document.getElementById('sessionInfo').textContent = `Session started: ${timeStr}`;
+                
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('dashboard').classList.add('active');
+                
+                // Hide decorative elements on dashboard
+                document.querySelectorAll('.decorative-circle').forEach(el => {
+                    el.style.display = 'none';
+                });
+                document.querySelector('.login-page-bg').style.display = 'none';
+                
+                startDataSimulation();
+            }
+        });
+
+        // Logout
+        function logout() {
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('dashboard').classList.remove('active');
+            
+            // Show decorative elements again
+            document.querySelectorAll('.decorative-circle').forEach(el => {
+                el.style.display = 'block';
+            });
+            document.querySelector('.login-page-bg').style.display = 'block';
+            
+            stopDataSimulation();
+        }
+
+        // Simulate real-time OBD data
+        function updateMetrics() {
+            const now = new Date();
+            const timeStr = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+            
+            // Generate realistic values
+            const voltage = Math.max(350, Math.min(420, 385 + Math.random() * 20 - 10));
+            const current = Math.max(0, Math.min(200, 50 + Math.random() * 40 - 20));
+            const temperature = Math.max(20, Math.min(50, 32 + Math.random() * 6 - 3));
+            const speed = Math.max(0, Math.min(120, 60 + Math.random() * 40 - 20));
+            const soc = Math.max(20, Math.min(100, 75 + Math.random() * 10 - 5));
+            const soh = Math.max(80, Math.min(100, 92 + Math.random() * 4 - 2));
+            const power = (voltage * current) / 1000; // kW
+            const whPerKm = speed > 0 ? (power * 1000) / speed : 0; // Wh/km
+            const regenPercent = Math.max(0, Math.min(100, 15 + Math.random() * 20 - 10));
+            const accelMps2 = Math.max(-3, Math.min(3, Math.random() * 2 - 1));
+            const powerSpike = Math.max(0, Math.min(100, power + Math.random() * 10 - 5));
+
+            // Update display
+            document.getElementById('voltageValue').textContent = voltage.toFixed(1);
+            document.getElementById('currentValue').textContent = current.toFixed(1);
+            document.getElementById('temperatureValue').textContent = temperature.toFixed(1);
+            document.getElementById('speedValue').textContent = speed.toFixed(1);
+            document.getElementById('socValue').textContent = soc.toFixed(1);
+            document.getElementById('sohValue').textContent = soh.toFixed(1);
+            document.getElementById('powerValue').textContent = power.toFixed(2);
+            document.getElementById('whPerKmValue').textContent = whPerKm.toFixed(1);
+            document.getElementById('regenPercentValue').textContent = regenPercent.toFixed(1);
+            document.getElementById('accelMps2Value').textContent = accelMps2.toFixed(2);
+            document.getElementById('powerSpikeValue').textContent = powerSpike.toFixed(2);
+
+            // Update status indicators
+            updateStatus('voltage', voltage, [360, 380]);
+            updateStatus('current', current, [100, 150]);
+            updateStatus('temperature', temperature, [35, 45]);
+            updateStatus('speed', speed, [80, 100]);
+            updateStatus('soc', soc, [20, 50]);
+            updateStatus('soh', soh, [85, 90]);
+            updateStatus('power', power, [30, 50]);
+            updateStatus('whPerKm', whPerKm, [200, 300]);
+            updateStatus('regenPercent', regenPercent, [10, 20]);
+            updateStatus('accelMps2', Math.abs(accelMps2), [1.5, 2.5]);
+            updateStatus('powerSpike', powerSpike, [60, 80]);
+
+            // Store historical data
+            historicalData.voltage.push(voltage);
+            historicalData.current.push(current);
+            historicalData.temperature.push(temperature);
+            historicalData.speed.push(speed);
+            historicalData.soc.push(soc);
+            historicalData.soh.push(soh);
+            historicalData.power.push(power);
+            historicalData.whPerKm.push(whPerKm);
+            historicalData.regenPercent.push(regenPercent);
+            historicalData.accelMps2.push(accelMps2);
+            historicalData.powerSpike.push(powerSpike);
+            historicalData.timestamps.push(timeStr);
+
+            // Keep only last 20 data points
+            if (historicalData.timestamps.length > 20) {
+                Object.keys(historicalData).forEach(key => {
+                    historicalData[key].shift();
+                });
+            }
+        }
+
+        function updateStatus(metric, value, thresholds) {
+            const statusElement = document.getElementById(metric + 'Status');
+            
+            if (metric === 'soc' || metric === 'soh' || metric === 'regenPercent') {
+                if (value < thresholds[0]) {
+                    statusElement.className = 'metric-status status-critical';
+                    statusElement.textContent = 'Critical';
+                } else if (value < thresholds[1]) {
+                    statusElement.className = 'metric-status status-warning';
+                    statusElement.textContent = 'Warning';
+                } else {
+                    statusElement.className = 'metric-status status-good';
+                    statusElement.textContent = 'Good';
+                }
+            } else {
+                if (value > thresholds[1]) {
+                    statusElement.className = 'metric-status status-critical';
+                    statusElement.textContent = 'High';
+                } else if (value > thresholds[0]) {
+                    statusElement.className = 'metric-status status-warning';
+                    statusElement.textContent = 'Elevated';
+                } else {
+                    statusElement.className = 'metric-status status-good';
+                    statusElement.textContent = 'Normal';
+                }
+            }
+        }
+
+        function startDataSimulation() {
+            updateMetrics();
+            updateInterval = setInterval(updateMetrics, 2000); // Update every 2 seconds
+        }
+
+        function stopDataSimulation() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+            }
+        }
+
+        // Modal handling
+        function openModal(metric) {
+            const modal = document.getElementById('modal');
+            modal.classList.add('active');
+
+            const metricLabels = {
+                voltage: 'Voltage (V)',
+                current: 'Current (A)',
+                temperature: 'Battery Temperature (°C)',
+                speed: 'Speed (km/h)',
+                soc: 'SOC (%)',
+                soh: 'SOH (%)',
+                power: 'Power (kW)',
+                whPerKm: 'Wh per km',
+                regenPercent: 'Regen Percent (%)',
+                accelMps2: 'Accel (m/s²)',
+                powerSpike: 'Power Spike (kW)'
+            };
+
+            document.getElementById('modalTitle').textContent = metricLabels[metric] + ' History';
+
+            // Destroy previous chart
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            // Create new chart
+            const ctx = document.getElementById('chart').getContext('2d');
+            currentChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: historicalData.timestamps,
+                    datasets: [{
+                        label: metricLabels[metric],
+                        data: historicalData[metric],
+                        borderColor: getMetricColor(metric),
+                        backgroundColor: getMetricColor(metric) + '33',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('active');
+        }
+
+        function getMetricColor(metric) {
+            const colors = {
+                soc: '#4caf50',
+                soh: '#2196f3',
+                voltage: '#ff9800',
+                current: '#9c27b0',
+                temperature: '#f44336',
+                efficiency: '#00bcd4',
+                speed: '#8bc34a',
+                power: '#ff5722',
+                whPerKm: '#00bcd4',
+                regenPercent: '#009688',
+                accelMps2: '#673ab7',
+                powerSpike: '#e91e63'
+            };
+            return colors[metric] || '#2c3e77';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
